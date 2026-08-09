@@ -1,0 +1,198 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "AI Student Study Planner",
+        "formDescription": "This planner helps you create a personalized study schedule using automation and AI. Please provide your academic details below. Based on your inputs, the system will generate a daily or weekly plan and send it to your email.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Student Name",
+              "placeholder": "Enter full name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email Address",
+              "placeholder": "The generated study plan will be sent here.",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Branch",
+              "placeholder": "Enter your domain.",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Current Year",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "1st"
+                  },
+                  {
+                    "option": "2nd"
+                  },
+                  {
+                    "option": "3rd"
+                  },
+                  {
+                    "option": "4th"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Subjects",
+              "placeholder": "Enter subjects included in your course.",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Priority Subject"
+            },
+            {
+              "fieldLabel": "Preferred Study Style",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Daily Plan"
+                  },
+                  {
+                    "option": "Weekly Plan"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Study Hours"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -192,
+        -32
+      ],
+      "id": "3d1a0e39-39a8-43d8-b202-7280fb2e3803",
+      "name": "On form submission",
+      "webhookId": "8bcc7c56-15a4-4be0-b074-cb0c0795cacb"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Create a weekly study plan for {{ $json[\"Student Name\"] }},{{ $json['Current Year'] }} year {{ $json.Branch }} student. \nSubjects: {{ $json.Subjects }} \nPriority subject:{{ $json['Priority Subject'] }} \nStudy hours: {{ $json['Study Hours'] }}\nFormat output as a clear weekly table (Day | Subject | Duration). \nKeep it practical and student-friendly.\nThe output should be in email format and use the gmail tool to send the mail.\nYou can also add some extra notes for knowledge and better time management. ",
+        "options": {
+          "systemMessage": "You are an academic study planner assistant. Your role is to help students organize their study time effectively. \nYou will receive inputs such as subjects, goals, and available study hours.\nBased on this information, you must:\n- Prioritize subjects according to the importance.\n- Distribute study sessions fairly across available time.\n- Create a clear daily or weekly schedule in table format as selected by the user.\n- Keep the plan practical, achievable, and student-friendly.\n- Output the schedule as structured text that can be sent directly by email.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        16,
+        -32
+      ],
+      "id": "eaa266c4-82f4-4a75-a644-a70686c5f499",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3-flash-preview",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        176
+      ],
+      "id": "a335854a-ba62-42a5-9d9e-34106b59e53c",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Iy3J1Juj6A6xsPQ8",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json[\"Email Address\"] }}",
+        "subject": "=AI Student Study Planner for  {{ $('On form submission').item.json[\"Email Address\"] }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        176,
+        176
+      ],
+      "id": "e52279ac-3f0c-4863-bd76-4bcf1dc01a6f",
+      "name": "Send a message in Gmail",
+      "webhookId": "f61fc0ad-94bb-4792-896a-14bb4f0cf09a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "MqBajshgximc1FGL",
+          "name": "Gmail account 5"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "ee28a77d-ef32-427d-9c77-86317dc8559e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f7cf59c9177a7be4ab3582805c64156641a4471125cf26ad48ac469a7b7209ae"
+  },
+  "id": "653QZt2cNiLjFFvr",
+  "tags": []
+}
