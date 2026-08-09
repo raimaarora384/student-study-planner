@@ -40,9 +40,6 @@ The workflow follows these steps:
 
 - `My workflow (1).json` — n8n workflow exported as JSON
 
-## 📸 Demo
-
-Screenshots demonstrating the form, n8n workflow, and generated email will be added here.
 
 ## 🚀 Future Improvements
 
